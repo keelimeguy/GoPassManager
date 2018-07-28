@@ -1,0 +1,24 @@
+#!/bin/bash
+set -e
+function cleanup {
+    tput rmcup
+}
+trap cleanup EXIT
+
+tput smcup
+read -p "GPG Identifier: " name
+prvkey=$(gpg -a --export-secret-key $name)
+pubkey=$(gpg -a --export $name)
+
+tput smcup
+read -s -p "Re-enter pgp password: " prvpass
+tput rmcup
+
+tput smcup
+read -p "Database user: " dbuser
+read -s -p "Database password: " dbpass
+dbname=pass_manager
+tput rmcup
+
+tput smcup
+./pass_manager "$pubkey" "$prvkey" "$prvpass" "$dbuser" "$dbpass" "$dbname"
