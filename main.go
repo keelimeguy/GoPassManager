@@ -86,14 +86,25 @@ func mainLoop() {
     domains, err := db.GetDomainList(pub_key)
     check(err)
 
+    num_per_page := 15
+    num_pages := int(len(domains)/num_per_page)+1
+    cur_page := 1
+
     done := false
     for !done {
         header := ""
 
         fmt.Println("Active Key:", id)
+        fmt.Println("Page", cur_page, "/", num_pages)
 
         if len(domains) > 0 {
             for i, domain := range domains {
+                if i < num_per_page*(cur_page-1) {
+                    continue
+                }
+                if i >= num_per_page*cur_page {
+                    break
+                }
                 fmt.Println((i+1),":",domain)
             }
         } else {
@@ -101,6 +112,7 @@ func mainLoop() {
         }
 
         fmt.Println(">Enter domain number to read domain password.")
+        fmt.Println(">Enter '>' and '<' to navigate pages.")
         fmt.Println(">Enter 'd<num>' to delete selected domain.")
         fmt.Println(">Enter 'n' to create new domain.")
         fmt.Println(">Enter 'q' to exit.")
@@ -110,6 +122,16 @@ func mainLoop() {
         choice = choice[:len(choice)-1]
 
         switch choice {
+            case "<":
+                if cur_page > 1 {
+                    cur_page--
+                }
+
+            case ">":
+                if cur_page < num_pages {
+                    cur_page++
+                }
+
             case "n":
                 fmt.Print("Domain name: ")
                 domain, err := reader.ReadString('\n')
